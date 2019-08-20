@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
 
+import { Link } from "react-router-dom";
 import { Alert } from "reactstrap";
 import { registerUser } from "../../actions/auth";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
 
-export class register extends Component {
+class Register extends Component {
   constructor(props) {
     super(props);
     document.title = "OnlineChat - Register";
@@ -23,7 +23,8 @@ export class register extends Component {
   };
 
   static propTypes = {
-    registerUser: PropTypes.func.isRequired
+    registerUser: PropTypes.func.isRequired,
+    auth: PropTypes.object
   };
 
   onChange = e => {
@@ -161,4 +162,4 @@ const mapStateToProps = state => ({
 export default connect(
   mapStateToProps,
   { registerUser }
-)(register);
+)(Register);

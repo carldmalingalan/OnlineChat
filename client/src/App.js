@@ -6,7 +6,8 @@ import { Provider } from "react-redux";
 import store from "./store";
 
 // Components
-import { Login, Register } from "./components/main/index";
+import Login from "./components/main/Login";
+import Register  from "./components/main/Register";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
