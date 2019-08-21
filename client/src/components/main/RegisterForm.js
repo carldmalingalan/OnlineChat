@@ -1,15 +1,40 @@
 import React, { Component } from "react";
-
-import { Link } from "react-router-dom";
 import { Alert } from "reactstrap";
-import { registerUser } from "../../actions/auth";
+import { Link, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
+
 import PropTypes from "prop-types";
+
+import { registerUser } from "../../actions/auth";
+import { clearNotif } from "../../actions/notif";
 
 export class RegisterForm extends Component {
   constructor(props) {
     super(props);
-    document.title = "OnlineChat - Register";
+    document.title = "Register - OnlineChat";
+  }
+
+  componentDidUpdate(prevProps) {
+    const { notif } = this.props;
+    if (notif !== prevProps.notif) {
+      if (notif.type === "success") {
+        document
+          .getElementById("submitBtn")
+          .setAttribute("disabled", "disabled");
+        this.setState({
+          error: notif,
+          visible: true,
+          firstname: "",
+          lastname: "",
+          email: "",
+          password: "",
+          password1: ""
+        });
+        setTimeout(() => this.setState({ redi: true }), 3000);
+      } else {
+        this.setState({ error: notif, visible: true });
+      }
+    }
   }
 
   state = {
@@ -18,13 +43,16 @@ export class RegisterForm extends Component {
     email: "",
     password: "",
     password1: "",
-    error: null,
+    redi: false,
+    error: { type: null, message: null },
     visible: false
   };
 
   static propTypes = {
     registerUser: PropTypes.func.isRequired,
-    auth: PropTypes.object
+    clearNotif: PropTypes.func.isRequired,
+    auth: PropTypes.object,
+    notif: PropTypes.object
   };
 
   onChange = e => {
@@ -32,29 +60,29 @@ export class RegisterForm extends Component {
   };
 
   onDismiss = e => {
-    this.setState({ visible: false, error: null });
+    this.setState({ visible: false, error: { type: null, message: null } });
   };
 
   onSubmit = e => {
     e.preventDefault();
+
     const { firstname, lastname, email, password, password1 } = this.state;
     const userObj = this.state;
-    console.log(firstname, lastname, email, password, password1);
+
     if (!firstname || !lastname || !email || !password || !password1) {
-      return this.setState({ error: "Please fill all fields.", visible: true });
+      return this.setState({
+        error: { type: "warning", message: "Please fill all fields." },
+        visible: true
+      });
     }
     if (password !== password1) {
-      return this.setState({ error: "Password must match.", visible: true });
+      return this.setState({
+        error: { type: "warning", message: "Password must match." },
+        visible: true
+      });
     }
-    this.props.registerUser(userObj);
 
-    this.setState({
-      firstname: "",
-      lastname: "",
-      email: "",
-      password: "",
-      password1: ""
-    });
+    this.props.registerUser(userObj);
   };
   render() {
     const {
@@ -64,16 +92,26 @@ export class RegisterForm extends Component {
       password,
       password1,
       error,
-      visible
+      visible,
+      redi
     } = this.state;
+
+    if (redi) {
+      return <Redirect to="/" />;
+    }
+
     return (
       <div className="d-flex align-items-center" style={{ height: "100vh" }}>
         <div className="container">
           <div className="row">
             <div className="col-12 col-sm-12 col-md-6 col-lg-6 offset-md-3">
-              <Alert color="danger" isOpen={visible} toggle={this.onDismiss}>
+              <Alert
+                color={error.type}
+                isOpen={visible}
+                toggle={this.onDismiss}
+              >
                 <strong>Alert! </strong>
-                {error}
+                {error.message}
               </Alert>
               <div className="card">
                 <div className="card-body">
@@ -134,6 +172,7 @@ export class RegisterForm extends Component {
                       />
                     </div>
                     <button
+                      id="submitBtn"
                       className="btn btn-block btn-outline-success"
                       type="submit"
                     >
@@ -156,10 +195,11 @@ export class RegisterForm extends Component {
 }
 
 const mapStateToProps = state => ({
-  auth: state.auth
+  auth: state.auth,
+  notif: state.notif
 });
 
 export default connect(
   mapStateToProps,
-  { registerUser }
+  { registerUser, clearNotif }
 )(RegisterForm);

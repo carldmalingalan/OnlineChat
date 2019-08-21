@@ -4,7 +4,8 @@ import {
   USER_LOADING,
   USER_LOADED,
   REGISTER_ERROR,
-  REGISTER_SUCCESS
+  REGISTER_SUCCESS,
+  NOTIF_REGISTER
 } from "./types";
 import axios from "axios";
 
@@ -24,16 +25,38 @@ export const registerUser = UserObj => (dispatch, getState) => {
   axios
     .post("/auth/register", JSON.stringify(UserObj), getConfig(getState))
     .then(result => {
-      console.log(result);
+      dispatch({
+        type: NOTIF_REGISTER,
+        payload: result.data.notif
+      });
+
+      dispatch({
+        type: REGISTER_SUCCESS,
+        payload: result.data.data
+      });
+    })
+    .catch(error => {
+      dispatch({
+        type: REGISTER_ERROR
+      });
+    });
+};
+
+export const loginUser = UserObj => (dispatch, getState) => {
+  axios
+    .post("/auth/login", JSON.stringify(UserObj), getConfig(getState))
+    .then(result => {
+      dispatch({
+        type: NOTIF_REGISTER,
+        payload: result.data.notif
+      });
+
       dispatch({
         type: LOGIN_SUCCESS,
         payload: result.data
       });
     })
     .catch(error => {
-      console.log(error);
-      dispatch({
-        type: LOGIN_ERROR
-      });
+      dispatch({ type: LOGIN_ERROR });
     });
 };
